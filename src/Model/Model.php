@@ -1,15 +1,18 @@
 <?php
 
-namespace App\src\Model;
+namespace App\Model;
 
-use Exception;
 use PDO;
+use PDOException;
+use Exception;
 
-abstract class Model {
-    private string $host;
-    private string $dbName;
-    private string $user;
-    private ?string $password = '';
+abstract class Model
+{
+    protected string $host;
+    protected string $dbname;
+    protected string $username;
+    protected string $password = '';
+    protected PDO $db;
     protected string $table;
 
     public function __construct() {
@@ -18,8 +21,8 @@ abstract class Model {
 
         try {
             $this->host = $config['DB_HOST'];
-            $this->dbName = $config['DB_NAME'];
-            $this->user = $config['DB_USER'];
+            $this->dbname = $config['DB_NAME'];
+            $this->username = $config['DB_USER'];
             if (array_key_exists('DB_PASSWORD', $config)) {
                 $this->password = $config['DB_PASSWORD'];
             }
@@ -33,8 +36,8 @@ abstract class Model {
     {
         try {
             return new PDO(
-                "mysql:host=$this->host;dbname=$this->dbName;charset=utf8",
-                $this->user,
+                "mysql:host=$this->host;dbname=$this->dbname;charset=utf8",
+                $this->username,
                 $this->password,
                 [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -48,7 +51,7 @@ abstract class Model {
         }
     }
 
-    public function findAll(): ?array
+    public function findAll(): array
     {
         try {
             $pdo = $this->connect();
@@ -59,4 +62,6 @@ abstract class Model {
             die;
         }
     }
+
+    abstract public function insert(array $params): void;
 }

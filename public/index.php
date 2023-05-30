@@ -1,10 +1,24 @@
 <?php
 
-use App\Config\Autoloader;
-use App\src\Controller\UserController;
+require __DIR__ . '/../config/Autoloader.php';
+require __DIR__ . '/../config/routes/Router.php';
 
-require '..\config\Autoloader.php';
+use App\Config\Autoloader;
+use App\Config\Routes\Router;
+use App\Config\Routes\RouterException;
+
 Autoloader::register();
 
-$controller = new UserController();
-$controller->index();
+$url = $_SERVER['REQUEST_URI'];
+$router = new Router($url);
+
+//Test
+$router->get('home', function () {
+    echo 'Home';});
+$router->get('contact', function () {
+    echo 'Contact';});
+
+try {
+    $router->run();
+} catch (RouterException $e) {
+}

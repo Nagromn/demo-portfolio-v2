@@ -7,15 +7,11 @@
     <title>Portfolio v2</title>
 </head>
 <body>
-    <header>
-        <?php include '../templates/partials/_header.php'; ?>
-    </header>
+    <?php include 'partials/_header.php'; ?>
     <main>
         <?php /** @var string $content */ ?>
         <?= $content ?>
     </main>
-    <footer>
-        <?php include '../templates/partials/_footer.php'; ?>
-    </footer>
+    <?php include 'partials/_footer.php'; ?>
 </body>
 </html>
