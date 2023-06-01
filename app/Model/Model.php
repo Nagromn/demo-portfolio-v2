@@ -2,9 +2,9 @@
 
 namespace App\Model;
 
-use PDO;
-use PDOException;
+use Config\EnvironmentLoader;
 use Exception;
+use PDO;
 
 abstract class Model
 {
@@ -15,21 +15,25 @@ abstract class Model
     protected PDO $db;
     protected string $table;
 
-    public function __construct() {
-        $configFilePath = dirname(__FILE__) . '/../../config/config.php';
-        $config = require_once $configFilePath;
+    public function __construct()
+    {
+        EnvironmentLoader::load(__DIR__ . '/../..');
+        $this->loadEnvironmentVariables();
 
         try {
-            $this->host = $config['DB_HOST'];
-            $this->dbname = $config['DB_NAME'];
-            $this->username = $config['DB_USER'];
-            if (array_key_exists('DB_PASSWORD', $config)) {
-                $this->password = $config['DB_PASSWORD'];
-            }
+            $this->db = $this->connect();
         } catch (Exception $e) {
             echo 'Exception reçue : ',  $e->getMessage(), "\n";
             die;
         }
+    }
+
+    protected function loadEnvironmentVariables(): void
+    {
+        $this->host = $_ENV['DB_HOST'];
+        $this->dbname = $_ENV['DB_NAME'];
+        $this->username = $_ENV['DB_USER'];
+        $this->password = $_ENV['DB_PASSWORD'];
     }
 
     public function connect(): PDO

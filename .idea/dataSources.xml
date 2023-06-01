@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="portfolio@localhost" uuid="498b2609-a1cb-4cb0-a3e0-7b2518218804">
+    <data-source source="LOCAL" name="portfolio-v2@localhost" uuid="bbd2f581-c62f-42d9-ad5f-67f3b699f10c">
       <driver-ref>mariadb</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.mariadb.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mariadb://localhost:3306/portfolio</jdbc-url>
+      <jdbc-url>jdbc:mariadb://localhost:3306/portfolio-v2</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
