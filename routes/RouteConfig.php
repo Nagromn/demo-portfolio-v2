@@ -10,6 +10,36 @@ use ReflectionMethod;
 
 class RouteConfig
 {
+    private const ROUTES = [
+        HomeController::class => [
+            'home' => [
+                'path' => '/',
+                'method' => 'GET',
+            ],
+            'professional' => [
+                'path' => '/professional',
+                'method' => 'GET',
+            ],
+            'project' => [
+                'path' => '/project',
+                'method' => 'GET',
+            ],
+            'skill' => [
+                'path' => '/skill',
+                'method' => 'GET',
+            ],
+        ],
+        AdminController::class => [
+            'dashboard' => [
+                'path' => '/admin-dashboard',
+                'method' => 'GET',
+            ],
+            'projectForm' => [
+                'path' => '/admin-project-form',
+                'method' => ['GET', 'POST'],
+            ],
+        ],
+    ];
 
     /**
      * @throws ReflectionException
@@ -18,27 +48,23 @@ class RouteConfig
     {
         $routes = [];
 
-        $controllers = [
-            HomeController::class => [
-                'home' => '/',
-                'professional' => '/professional',
-                'project' => '/project',
-                'skill' => '/skill',
-            ],
-            AdminController::class => [
-                'dashboard' => '/admin-dashboard',
-            ],
-        ];
-
-        foreach ($controllers as $controller => $routeMappings) {
+        foreach (self::ROUTES as $controller => $actions) {
             $reflection = new ReflectionClass($controller);
             $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
             foreach ($methods as $method) {
                 if ($method->class === $controller && $method->name !== '__construct') {
                     $action = $method->name;
-                    $routePath = $routeMappings[$action] ?? '/notfound';
-                    $routes[] = new Route('GET', $routePath, $controller, $action);
+                    $routeData = $actions[$action] ?? null;
+
+                    if ($routeData !== null) {
+                        $routePath = $routeData['path'];
+                        $routeMethods = $routeData['method'];
+                        $routeMethods = is_array($routeMethods) ? $routeMethods : [$routeMethods];
+                        foreach ($routeMethods as $routeMethod) {
+                            $routes[] = new Route($routeMethod, $routePath, $controller, $action);
+                        }
+                    }
                 }
             }
         }
