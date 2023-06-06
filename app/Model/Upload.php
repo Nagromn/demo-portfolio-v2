@@ -2,11 +2,15 @@
 
 namespace App\Model;
 
+use DateTime;
 use Exception;
 
 class Upload extends Model
 {
     protected string $table = 'upload';
+    protected array $files = [];
+    protected string $location = 'uploads/';
+    protected DateTime $createdAt;
 
     public function __construct()
     {
@@ -14,26 +18,53 @@ class Upload extends Model
     }
 
     /**
+     * Définit les fichiers à traiter.
+     *
+     * @param array $files Fichiers à traiter
+     */
+    public function setFiles(array $files): void
+    {
+        $this->files = $files;
+    }
+
+    /**
+     * Définit l'emplacement du fichier.
+     *
+     * @param string $location Emplacement du fichier
+     */
+    public function setLocation(string $location): void
+    {
+        $this->location = $location;
+    }
+
+    /**
+     * Définit la date de création.
+     *
+     * @param DateTime $createdAt Date de création
+     */
+    public function setCreatedAt(DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
      * Insère les données dans la base de données.
      *
-     * @param array $params Paramètres à insérer
      * @throws Exception En cas d'erreur lors de l'exécution de la requête SQL ou de la vérification de l'image
      */
     public function insert(array $params): void
     {
         // Récupérer les paramètres
-        $params = $_FILES['files'] ?? [];
+        $this->setFiles($_FILES['files'] ?? []);
+        $this->setCreatedAt(new DateTime());
 
         // Vérifier l'upload des images
-        $uploadedPaths = $this->uploadImages($params);
+        $uploadedPaths = $this->uploadImages($this->files);
 
         // Vérifier si au moins une image a été chargée avec succès
         if (empty($uploadedPaths)) {
             throw new Exception('Aucune image valide n\'a été chargée.');
         }
-
-        // Récupérer la date de création
-        $createdAt = date('Y-m-d H:i:s');
 
         // Parcourir les chemins des images chargées
         foreach ($uploadedPaths as $imagePath) {
@@ -45,18 +76,18 @@ class Upload extends Model
             // Exécuter la requête avec les paramètres
             $query->execute([
                 'fileName' => $fileName,
-                'location' => $imagePath,
-                'createdAt' => $createdAt,
+                'location' => $this->location . $fileName,
+                'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             ]);
         }
     }
+
 
     /**
      * @throws Exception
      */
     public function uploadImages(array $files): array
     {
-        $uploadDir = 'uploads/';
         $uploadedPaths = [];
 
         // Parcourir les fichiers
@@ -76,7 +107,7 @@ class Upload extends Model
             $uniqueFileName = uniqid() . '.' . $extension;
 
             // Déplacer le fichier téléchargé vers le dossier des téléchargements
-            $uploaded = move_uploaded_file($tmpName, $uploadDir . $uniqueFileName);
+            $uploaded = move_uploaded_file($tmpName, $this->location . $uniqueFileName);
 
             // Vérifier si le fichier a été déplacé avec succès
             if (!$uploaded) {
@@ -84,7 +115,7 @@ class Upload extends Model
             }
 
             // Ajouter le chemin du fichier dans le tableau
-            $uploadedPaths[] = $uploadDir . $uniqueFileName;
+            $uploadedPaths[] = $this->location . $uniqueFileName;
         }
 
         return $uploadedPaths;

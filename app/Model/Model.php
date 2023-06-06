@@ -14,6 +14,7 @@ abstract class Model
     protected string $password = '';
     protected PDO $db;
     protected string $table;
+    protected int $lastInsertedId;
 
     public function __construct()
     {
@@ -68,4 +69,9 @@ abstract class Model
     }
 
     abstract public function insert(array $params): void;
+
+    public function getLastInsertedId(): int
+    {
+        return $this->lastInsertedId;
+    }
 }
