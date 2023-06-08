@@ -5,13 +5,26 @@ namespace App\Model;
 use DateTime;
 use Exception;
 
+/**
+ * Gère les uploads.
+ * @package App\Model
+ */
 class Upload extends Model
 {
+    /**
+     * @var string $table Nom de la table
+     * @var array $files Fichiers à traiter
+     * @var string $location Emplacement du fichier
+     * @var DateTime $createdAt Date de création
+     */
     protected string $table = 'upload';
     protected array $files = [];
     protected string $location = 'uploads/';
     protected DateTime $createdAt;
 
+    /**
+     * Constructeur.
+     */
     public function __construct()
     {
         parent::__construct();
@@ -82,8 +95,8 @@ class Upload extends Model
         }
     }
 
-
     /**
+     * Télécharge les images dans le dossier des uploads.
      * @throws Exception
      */
     public function uploadImages(array $files): array

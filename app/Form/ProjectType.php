@@ -8,17 +8,24 @@ use App\Model\Upload;
 use DateTime;
 use Exception;
 
+/**
+ * Class ProjectType
+ * @package App\Form
+ */
 class ProjectType
 {
+    /**
+     * Gère la requête du formulaire de projet.
+     */
     public function handleRequest(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // Récupérer les données du formulaire
-                $files = $_FILES['files'] ?? [];
-                $projectName = $_POST['projectName'] ?? '';
-                $categories = $_POST['category'] ?? [];
-                $content = $_POST['content'] ?? '';
+                $files = $_FILES['files'] ?? []; // Fichiers téléchargés
+                $projectName = $_POST['projectName'] ?? ''; // Nom du projet
+                $categories = $_POST['category'] ?? []; // Catégories sélectionnées
+                $content = $_POST['content'] ?? ''; // Contenu du projet
 
                 // Insertion du projet
                 $params = [
@@ -31,11 +38,11 @@ class ProjectType
                 $project->setProjectName($projectName);
                 $project->setContent($content);
                 $project->setCreatedAt(new DateTime());
-
                 foreach ($categories as $categoryId) {
-                    $project->addCategory($categoryId);
+                    $project->addCategory($categoryId); // Ajouter les catégories au projet
                 }
 
+                // Insérer le projet dans la base de données
                 $project->insert($params);
 
                 // Récupérer l'ID du projet nouvellement inséré
