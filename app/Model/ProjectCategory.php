@@ -52,4 +52,9 @@ class ProjectCategory extends Model
         $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (project_id, category_id) VALUES ' . implode(',', $values));
         $query->execute();
     }
+
+    public function update(array $params): void
+    {
+        // TODO: Implement update() method.
+    }
 }

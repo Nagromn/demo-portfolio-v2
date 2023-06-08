@@ -2,7 +2,8 @@
 
 <!--Formulaire de mis à jour des données de l'utilisateur-->
 <form method="POST" action="/admin-update-user">
-    <input type="hidden" name="id" value="<?php echo $userData['id']?>">
+    <input type="hidden" name="id" value="<?php /** @var array $userData */
+    echo $userData['id']?>">
     <label for="email">Email :</label>
     <input type="email" name="email" id="email" value="<?php echo $userData['email']?>" required>
     <br>

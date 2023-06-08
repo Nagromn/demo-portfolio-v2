@@ -133,4 +133,9 @@ class Upload extends Model
 
         return $uploadedPaths;
     }
+
+    public function update(array $params): void
+    {
+        // TODO: Implement update() method.
+    }
 }

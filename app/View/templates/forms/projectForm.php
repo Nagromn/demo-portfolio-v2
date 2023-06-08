@@ -10,7 +10,8 @@
 
     <label for="category"> Catégorie :
         <select name="category[]" multiple>
-            <?php foreach ($categories as $category) : ?>
+            <?php /** @var array $categories */
+            foreach ($categories as $category) : ?>
                 <?php $isSelected = in_array($category['id'], $categories) ? 'selected' : ''; ?>
                 <option value="<?= $category['id'] ?>" <?= $isSelected ?>>
                     <?= $category['name'] ?>
