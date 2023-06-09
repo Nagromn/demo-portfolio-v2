@@ -4,6 +4,7 @@ namespace App\Model;
 
 use AllowDynamicProperties;
 use DateTime;
+use Exception;
 
 /**
  * Gère les projets.
@@ -18,12 +19,68 @@ class Project extends Model
      * @property string $content Le contenu du projet
      * @property DateTime $createdAt La date de création du projet
      * @property array $categories Les catégories du projet
+     * @property int|null $userId L'ID de l'utilisateur
      */
     protected string $table = 'project';
     protected string $projectName;
     protected string $content;
     protected DateTime $createdAt;
     protected array $categories = [];
+    protected ?int $userId = null;
+
+    /**
+     * Permet d'insérer un projet.
+     * @return void
+     * @throws Exception
+     */
+    public function insert(): void
+    {
+        try {
+            // On prépare la requête d'insertion en base de données
+            $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (projectName, content, createdAt, user_id) VALUES (:projectName, :content, :createdAt, :user_id)');
+            $query->bindValue(':projectName', $this->getProjectName());
+            $query->bindValue(':content', $this->getContent());
+            $query->bindValue(':createdAt', $this->getCreatedAt()->format('Y-m-d H:i:s'));
+            $query->bindValue(':user_id', $this->getUserId());
+            $query->execute(); // On exécute la requête
+
+            $this->lastInsertedId = $this->db->lastInsertId(); // On récupère le dernier ID du projet inséré en base de données
+        } catch (Exception $e) {
+           echo 'Erreur lors de l\'enregistrement du projet : ' . $e->getMessage();
+        }
+    }
+
+    /**
+     * @return string Le nom du projet
+     */
+    private function getProjectName(): string
+    {
+        return $this->projectName;
+    }
+
+    /**
+     * @return string Le contenu du projet
+     */
+    private function getContent(): string
+    {
+        return $this->content;
+    }
+
+    /**
+     * @return DateTime La date de création du projet
+     */
+    private function getCreatedAt(): DateTime
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @return int|null L'ID de l'utilisateur
+     */
+    private function getUserId(): ?int
+    {
+        return $this->userId;
+    }
 
     /**
      * @param string $projectName Le nom du projet
@@ -50,8 +107,6 @@ class Project extends Model
     }
 
     /**
-     * Ajoute une catégorie au projet.
-     *
      * @param int $categoryId L'ID de la catégorie à ajouter
      */
     public function addCategory(int $categoryId): void
@@ -60,20 +115,10 @@ class Project extends Model
     }
 
     /**
-     * Insère les données du projet dans la table correspondante.
-     *
-     * @param array $params Les paramètres de l'insertion
+     * @param int|null $userId L'ID de l'utilisateur
      */
-    public function insert(array $params): void
+    public function setUserId(?int $userId): void
     {
-        $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (projectName, content, createdAt) VALUES (:projectName, :content, :createdAt)');
-        $query->execute($params);
-        $this->lastInsertedId = $this->db->lastInsertId();
-    }
-
-    public function update(array $params): void
-    {
-        $query = $this->db->prepare('UPDATE ' . $this->table . ' SET projectName = :projectName, content = :content, createdAt = :createdAt WHERE id = :id');
-        $query->execute($params);
+        $this->userId = $userId;
     }
 }

@@ -2,6 +2,9 @@
 
 namespace Routes;
 
+use Exception;
+use ReflectionClass;
+
 /**
  * Class Router
  * @package Routes
@@ -40,6 +43,7 @@ class Router
      * @param string $method La méthode HTTP de la requête.
      * @param string $path Le chemin de la requête (URL).
      * @return void
+     * @throws Exception
      */
     public function dispatch(string $method, string $path): void
     {
@@ -64,13 +68,75 @@ class Router
      * @param string $controller Le nom de la classe du contrôleur.
      * @param string $action Le nom de l'action (méthode) du contrôleur.
      * @return void
+     * @throws Exception
      */
     private function executeAction(string $controller, string $action): void
     {
-        // Instanciation du contrôleur
-        $controllerInstance = new $controller();
+        // Classe ReflectionClass pour le contrôleur
+        $reflectionClass = new ReflectionClass($controller);
 
-        // Appel de l'action du contrôleur
-        $controllerInstance->$action();
+        // Vérifie si le constructeur a des paramètres
+        $constructor = $reflectionClass->getConstructor();
+        if ($constructor !== null) {
+            // Paramètres de type ReflectionParameters pour le constructeur
+            $parameters = $constructor->getParameters();
+            $dependencies = [];
+
+            foreach ($parameters as $parameter) {
+                // Type ReflectionType pour le type de paramètre
+                $parameterType = $parameter->getType();
+
+                if ($parameterType !== null && !$parameterType->isBuiltin()) {
+                    // Résolution de la dépendance en instanciant la classe correspondante
+                    $dependencyClass = $parameterType->getName();
+                    $dependency = new $dependencyClass();
+
+                    // Ajout de la dépendance résolue à la liste
+                    $dependencies[] = $dependency;
+                } else {
+                    // Impossible de résoudre la dépendance, lance une exception
+                    throw new Exception("Impossible de résoudre la dépendance pour le paramètre $parameter->name du constructeur de la classe $controller");
+                }
+            }
+
+            // Instancie le contrôleur avec les dépendances résolues
+            $controllerInstance = $reflectionClass->newInstanceArgs($dependencies);
+        } else {
+            // Si le constructeur n'a pas de paramètres, on peut l'instancier directement
+            $controllerInstance = new $controller();
+        }
+
+        // Vérifie si la méthode d'action existe
+        if ($reflectionClass->hasMethod($action)) {
+            // Classe ReflectionMethod pour la méthode d'action
+            $actionMethod = $reflectionClass->getMethod($action);
+
+            // Paramètres de type ReflectionParameters pour la méthode d'action
+            $actionParameters = $actionMethod->getParameters();
+            $actionDependencies = [];
+
+            foreach ($actionParameters as $parameter) {
+                // Type ReflectionType pour le type de paramètre
+                $parameterType = $parameter->getType();
+
+                if ($parameterType !== null && !$parameterType->isBuiltin()) {
+                    // Résolution de la dépendance en instanciant la classe correspondante
+                    $dependencyClass = $parameterType->getName();
+                    $dependency = new $dependencyClass();
+
+                    // Ajout de la dépendance résolue à la liste
+                    $actionDependencies[] = $dependency;
+                } else {
+                    // Impossible de résoudre la dépendance, lance une exception
+                    throw new Exception("Impossible de résoudre la dépendance pour le paramètre $parameter->name de la méthode d'action $action de la classe $controller");
+                }
+            }
+
+            // Appelle la méthode d'action avec les dépendances résolues
+            $actionMethod->invokeArgs($controllerInstance, $actionDependencies);
+        } else {
+            // Si la méthode d'action n'existe pas, lance une exception
+            throw new Exception("Méthode d'action $action non trouvée dans la classe $controller");
+        }
     }
 }

@@ -27,10 +27,11 @@ abstract class Model
     protected string $password = '';
     protected PDO $db;
     protected string $table;
-    protected int $lastInsertedId;
+    protected ?int $lastInsertedId = null;
 
     /**
-     * Model constructor.
+     * Constructeeur.
+     * @throws Exception
      */
     public function __construct()
     {
@@ -46,7 +47,7 @@ abstract class Model
     }
 
     /**
-     * Charge les variables d'environnement pour la connexion à la base de données.
+     * Charge les variables d'environnement.
      * @return void
      */
     protected function loadEnvironmentVariables(): void
@@ -58,8 +59,6 @@ abstract class Model
     }
 
     /**
-     * Établit une connexion PDO à la base de données.
-     *
      * @return PDO La connexion PDO établie
      */
     public function connect(): PDO
@@ -82,8 +81,6 @@ abstract class Model
     }
 
     /**
-     * Recherche un utilisateur par son identifiant.
-     *
      * @param int $id L'identifiant de l'utilisateur à rechercher
      * @return array|null Les informations de l'utilisateur trouvées dans la base de données, ou null si aucun utilisateur n'est trouvé
      * @throws Exception En cas d'erreur lors de l'exécution de la requête
@@ -103,8 +100,6 @@ abstract class Model
     }
 
     /**
-     * Récupère tous les enregistrements de la table.
-     *
      * @return array Les enregistrements de la table
      */
     public function findAll(): array
@@ -120,21 +115,10 @@ abstract class Model
     }
 
     /**
-     * Insère un nouvel enregistrement dans la table.
-     *
-     * @param array $params Les paramètres de l'insertion
+     * @return ?int L'ID du dernier enregistrement inséré
      */
-    abstract public function insert(array $params): void;
-
-    /**
-     * Retourne l'ID du dernier enregistrement inséré.
-     *
-     * @return int L'ID du dernier enregistrement inséré
-     */
-    public function getLastInsertedId(): int
+    public function getLastInsertedId(): ?int
     {
         return $this->lastInsertedId;
     }
-
-    abstract public function update(array $params): void;
 }

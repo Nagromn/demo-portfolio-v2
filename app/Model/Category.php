@@ -15,19 +15,15 @@ class Category extends Model
 
     /**
      * Insère un nouvel enregistrement dans la table.
-     *
-     * @param array $params Les paramètres de l'insertion
+     * @return void
      */
-    public function insert(array $params): void
-    {
-        // TODO: Implémenter la logique d'insertion pour la table 'category'
-    }
+    public function insert(): void
+    {}
 
     /**
      * Met à jour un enregistrement dans la table.
-     *
-     * @param array $params Les paramètres de la mise à jour
+     * @return void
      */
-    public function update(array $params): void
+    public function update(): void
     {}
 }

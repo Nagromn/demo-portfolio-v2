@@ -18,37 +18,33 @@ class UserType
      * @param User $user
      * @throws Exception
      */
-    public function registrationForm(array $params, User $user): void
+    public function registrationForm(User $user): void
     {
         // Vérifier si le formulaire a été soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Récupérer les données du formulaire
-            $email = $params['email'];
-            $password = $params['password'];
-            $isAdmin = $params['isAdmin'] ?? 0;
+            $username = $_POST['username'];
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+            $isAdmin = $_POST['isAdmin'] ?? 0;
 
-            // Vérifier si l'utilisateur existe déjà dans la base de données
-            $existingUser = $user->findByEmail($email);
+            $existingUser = $user->findByEmail($email); // Vérifier si l'utilisateur existe dans la base de données
 
-            // Si l'utilisateur existe
+            // Si l'utilisateur existe déjà
             if ($existingUser) {
                 throw new Exception("Un utilisateur avec cette adresse e-mail existe déjà.");
             }
 
-            // Hacher le mot de passe
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hacher le mot de passe
 
             // Insérer les données de l'utilisateur dans la base de données
             try {
-                $params = [
-                    'email' => $email,
-                    'password' => $hashedPassword,
-                    'isAdmin' => $isAdmin,
-                ];
-
-                // Insérer les données de l'utilisateur dans la base de données
-                $user->insert($params);
+                $user->setUsername($username); // Définir le pseudo de l'utilisateur
+                $user->setEmail($email); // Définir l'adresse e-mail de l'utilisateur
+                $user->setPassword($hashedPassword); // Définir le mot de passe de l'utilisateur
+                $user->setIsAdmin($isAdmin); // Définir le rôle de l'utilisateur
+                $user->insert(); // Insérer l'utilisateur dans la base de données
 
                 // Rediriger vers la page d'administration
                 Renderer::render('app/View/templates/pages/admin/dashboard.php', [

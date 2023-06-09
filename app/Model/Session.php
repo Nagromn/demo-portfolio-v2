@@ -10,7 +10,6 @@ namespace App\Model;
 class Session
 {
     /**
-     * Session constructor.
      * Initialise la session si elle n'est pas déjà démarrée.
      */
     public function __construct()
@@ -48,5 +47,14 @@ class Session
     public static function isLoggedIn(): bool
     {
         return !empty($_SESSION['auth']);
+    }
+
+    /**
+     * Récupère les informations de l'utilisateur connecté.
+     * @return array|null
+     */
+    public static function getUser(): ?array
+    {
+        return $_SESSION['auth'] ?? null;
     }
 }
