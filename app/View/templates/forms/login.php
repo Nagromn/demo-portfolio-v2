@@ -10,8 +10,8 @@
     <br>
     <input type="submit" value="Se connecter">
 </form>
-
 <br>
-
 <!--Lien pour se déconnecter-->
-<a href="/admin-logout">Se déconnecter</a>
+<?php if (isset($_SESSION)) : ?>
+    <a href="/admin-logout">Se déconnecter</a>
+<?php endif; ?>

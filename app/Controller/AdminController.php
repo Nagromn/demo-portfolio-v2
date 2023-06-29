@@ -28,7 +28,6 @@ use Utils\Renderer;
      * @param User $user // L'utilisateur connecté
      * @param Session $session // La session utilisateur
      * @param Project $project // Le projet
-     *
      * @return void
      * @throws Exception
      */
@@ -48,6 +47,12 @@ use Utils\Renderer;
         $this->projectType = $projectType;
         $this->upload = $upload;
         $this->user = $user;
+
+        // Vérifier si l'utilisateur est un administrateur, sinon bloquer l'accès
+        if (!Session::checkAuthorization()) {
+            echo 'Accès non autorisé.'; // Message d'erreur
+            exit; // Arrêter le script
+        }
     }
 
     /**
@@ -57,26 +62,36 @@ use Utils\Renderer;
      */
     public function dashboard(): void
     {
-        // Rend le fichier de template dashboard.php en utilisant la classe Renderer
-        Renderer::render('app/View/templates/pages/admin/dashboard.php');
+        $projectData = $this->project->findAll(); // Récupérer tous les projets
+
+        // Parcourir les projets
+        foreach ($projectData as &$project) {
+            $projectImages = $this->upload->getProjectUploads($project['id']); // Récupérer les images correspondantes
+            $project['images'] = $projectImages;
+        }
+
+        // Le reste du code pour afficher le tableau de bord de l'administrateur
+        Renderer::render('app/View/templates/pages/admin/dashboard.php', [
+            'projectData' => $projectData, // Les projets
+        ]);
     }
 
     /**
      * Permet l'insertion d'utilisateur par l'administrateur.
      * @param User $user
+     * @param UserType $userType
      * @return void
      * @throws Exception
      */
     public function registration(
         User $user,
+        UserType $userType,
     ): void
     {
-        $form = new UserType(); // Crée une instance du formulaire UserType
-        $form->registrationForm($user); // Gère la soumission du formulaire
-
+        $userType->registrationForm($user); // Gère la soumission du formulaire
         // Rend le fichier de template registration.php en utilisant la classe Renderer
         Renderer::render('app/View/templates/forms/registration.php', [
-            'form' => $form, // Le formulaire UserType
+            'form' => $userType, // Le formulaire UserType
         ]);
     }
 
@@ -92,34 +107,40 @@ use Utils\Renderer;
      * @param Upload $upload
      * @return void
      */
-    public function projectForm(
+    public function newProject(
         Session $session,
         Project $project,
         Category $category,
         ProjectCategory $projectCategory,
         ProjectType $projectType,
-        Upload $upload
+        Upload $upload,
     ): void
     {
+        // Gère la soumission du formulaire
+        $projectType = $projectType->newProjectForm(
+            $session,
+            $project,
+            $projectCategory,
+            $upload
+        );
         // Rend le fichier de template projectForm.php en utilisant la classe Renderer
         Renderer::render('app/View/templates/forms/projectForm.php', [
-            'form' => $projectType->handleRequest($session, $project, $projectCategory, $upload), // Le formulaire ProjectType
+            'form' => $projectType, // Le formulaire ProjectType
             'categories' => $category->findAll(), // La liste des catégories
-            'errors' => $projectType->getErrors(), // Les erreurs du formulaire
-            'success' => $projectType->getSuccess(), // Le message de succès
         ]);
     }
 
     /**
      * Permet la mise à jour d'un utilisateur par l'administrateur.
+     * @param User $user
+     * @param UserType $userType
      * @return void
-     * @throws Exception
      */
-    public function userUpdate(): void
+    public function userUpdate(
+        User $user,
+        UserType $userType,
+    ): void
     {
-        $form = new UserType(); // Crée une instance du formulaire UserType
-        $user = new User(); // Crée une instance de la classe User
-
         new Session(); // Crée une instance de la classe Session
         $id = Session::getUser()['id']; // Récupérer l'identifiant de l'utilisateur connecté
 
@@ -138,7 +159,7 @@ use Utils\Renderer;
                 throw new Exception("Impossible de trouver les informations de l'utilisateur.");
             }
 
-            $form->updateUserForm($user); // Gère la soumission du formulaire de mise à jour de l'utilisateur
+            $userType->updateUserForm($user); // Gère la soumission du formulaire de mise à jour de l'utilisateur
 
         } catch (Exception $e) {
             echo 'Exception reçue : ', $e->getMessage(), "\n";
@@ -147,8 +168,53 @@ use Utils\Renderer;
 
         // Rend le fichier de template userUpdate.php en utilisant la classe Renderer
         Renderer::render('app/View/templates/forms/userUpdate.php', [
-            'form' => $form, // Le formulaire UserType
+            'form' => $userType, // Le formulaire UserType
             'userData' => $userData, // Les informations de l'utilisateur
+        ]);
+    }
+
+    /**
+     * Permet la mise à jour d'un projet par l'administrateur.
+     * @param Project $project
+     * @param ProjectType $projectType
+     * @return void
+     */
+    public function projectUpdate(
+        Project $project,
+        ProjectType $projectType
+    ): void {
+        new Session(); // Crée une instance de la classe Session
+        $projectId = $_GET['id']; // Récupérer l'identifiant du projet à mettre à jour
+
+        // Vérifier si l'utilisateur est connecté
+        if (!Session::isLoggedIn()) {
+            Renderer::render('app/View/templates/forms/login.php'); // Rend le fichier de template login.php
+            exit; // Arrêter le script
+        }
+
+        try {
+            $projectData = $project->findById($projectId); // Rechercher le projet par son identifiant
+
+            // Vérifier si les informations du projet ont été trouvées
+            if (!$projectId) {
+                throw new Exception("Impossible de trouver les informations du projet."); // Afficher une exception
+            }
+
+            // Gérer la soumission du formulaire de mise à jour du projet
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $projectType->projectUpdateForm($project); // Gère la soumission du formulaire
+                header('Location: /admin-dashboard'); // Rediriger vers le tableau de bord de l'administrateur
+                exit; // Arrêter le script
+            }
+        } catch (Exception $e) {
+            echo 'Exception reçue : ', $e->getMessage(), "\n"; // Afficher l'exception
+            die; // Arrêter le script
+        }
+
+        // Rend le fichier de template updateProject.php en utilisant la classe Renderer
+        Renderer::render('app/View/templates/forms/projectUpdate.php', [
+            'form' => $projectType, // Le formulaire ProjectType
+            'projectData' => $projectData, // Les informations du projet
         ]);
     }
 }

@@ -28,15 +28,16 @@ class ProjectCategory extends Model
     {
         try {
             $values = []; // On initialise un tableau vide
+
             // On boucle sur les ID des catégories
             foreach ($this->categoryId as $categoryId) {
-                $values[] = "($this->projectId, $categoryId)";
+                $values[] = "($this->projectId, $categoryId)"; // On ajoute les ID des catégories dans le tableau
             }
-            // On prépare la requête d'insertion en base de données
-            $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (project_id, category_id) VALUES ' . implode(',', $values));
+
+            $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (project_id, category_id) VALUES ' . implode(',', $values)); // On prépare la requête SQL
             $query->execute(); // On exécute la requête SQL
         } catch (Exception $e) {
-            echo 'Erreur lors de l\'enregistrement des catégories : ' . $e->getMessage();
+            echo 'Erreur lors de l\'enregistrement des catégories : ' . $e->getMessage(); // On affiche un message d'erreur
         }
     }
 
@@ -49,19 +50,19 @@ class ProjectCategory extends Model
     }
 
     /**
-     * @return int L'ID du projet
-     */
-    public function getProjectId(): int
-    {
-        return $this->projectId;
-    }
-
-    /**
      * @param array $categoryId Les ID des catégories
      */
     public function setCategoryId(array $categoryId): void
     {
         $this->categoryId = $categoryId;
+    }
+
+    /**
+     * @return int L'ID du projet
+     */
+    public function getProjectId(): int
+    {
+        return $this->projectId;
     }
 
     /**

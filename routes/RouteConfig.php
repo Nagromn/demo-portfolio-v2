@@ -4,7 +4,7 @@ namespace Routes;
 
 use App\Controller\HomeController;
 use App\Controller\AdminController;
-use App\Controller\UserController;
+use App\Controller\SecurityController;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -25,47 +25,67 @@ class RouteConfig
      * - action : nom de l'action (méthode) du contrôleur à exécuter pour la route
      */
     private const ROUTES = [
+        // Controller pour l'affichage de la page d'accueil du site
         HomeController::class => [
+            // Route pour l'affichage de la page d'accueil
             'home' => [
                 'path' => '/',
                 'method' => 'GET',
             ],
+            // Route pour l'affichage des expériences professionnelles
             'professional' => [
                 'path' => '/professional',
                 'method' => 'GET',
             ],
+            // Route pour l'affichage des projets réalisés
             'project' => [
                 'path' => '/project',
                 'method' => 'GET',
             ],
+            // Route pour l'affichage des compétences et formations
             'skill' => [
                 'path' => '/skill',
                 'method' => 'GET',
             ],
         ],
+
+        // Controller pour l'administration du site
         AdminController::class => [
+            // Route pour l'administration
             'dashboard' => [
                 'path' => '/admin-dashboard',
                 'method' => 'GET',
             ],
+            // Route pour l'insertion d'utilisateur
             'registration' => [
                 'path' => '/admin-registration',
                 'method' => ['GET', 'POST'],
             ],
-            'projectForm' => [
+            // Route pour l'insertion de projet
+            'newProject' => [
                 'path' => '/admin-project-form',
                 'method' => ['GET', 'POST']
             ],
+            // Route pour la mise à jour d'un utilisateur
             'userUpdate' => [
                 'path' => '/admin-update-user',
                 'method' => ['GET', 'POST']
             ],
+            // Route pour la mise à jour d'un projet
+            'projectUpdate' => [
+                'path' => '/admin-update-project',
+                'method' => ['GET', 'POST']
+            ],
         ],
-        UserController::class => [
+
+        // Controller pour la sécurité (connexion/déconnexion) du site
+        SecurityController::class => [
+            // Route pour la connexion
             'login' => [
                 'path' => '/admin-login',
                 'method' => ['GET', 'POST'],
             ],
+            // Route pour la déconnexion
             'logout' => [
                 'path' => '/admin-logout',
                 'method' => 'GET',

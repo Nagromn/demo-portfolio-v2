@@ -1,3 +1,3 @@
 <header>
-    <p>HEADER ICI</p>
+    <p>HEADER</p>
 </header>

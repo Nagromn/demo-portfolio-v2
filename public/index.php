@@ -23,4 +23,11 @@ try {
 }
 
 // Dispatch de la requête courante vers la route correspondante
-$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+try {
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $method = $_SERVER['REQUEST_METHOD'];
+    $router->dispatch($method, $path);
+} catch (Exception $e) {
+    // Gérer l'exception ici en cas d'erreur lors du dispatching de la requête
+    echo 'Une erreur s\'est produite : ' . $e->getMessage();
+}

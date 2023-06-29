@@ -4,6 +4,7 @@ namespace App\Model;
 
 use DateTime;
 use Exception;
+use PDO;
 
 /**
  * Gère les uploads.
@@ -43,22 +44,21 @@ class Upload extends Model
             $username = Session::getUser()['username'] ?? null; // Récupérer l'username depuis la session
 
             $projectName = $_POST['projectName'] ?? ''; // Récupérer le nom du projet depuis $_POST du formulaire
-            $uploadedPaths = $this->uploadImages($this->files, $username, $projectName); // Vérifier l'upload des images
+            $uploadedPaths = $this->uploadFiles($this->files, $username, $projectName); // Vérifier l'upload des images
 
             // Vérifier si au moins une image a été chargée avec succès
             if (empty($uploadedPaths)) {
-                throw new Exception('Aucune image valide n\'a été chargée.');
+                throw new Exception('Aucune image valide n\'a été chargée.'); // Message d'erreur
             }
 
             // Parcourir les chemins des images téléchargées
             foreach ($uploadedPaths as $imagePath) {
-                // Traiter les données avant de les insérer dans la base de données
-                $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (fileName, location, createdAt, user_id, project_id) VALUES (:fileName, :location, :createdAt, :user_id, :project_id)');
-                $query->bindValue(':fileName', basename($imagePath));
-                $query->bindValue(':location', $this->getLocation() . $username . '/' . $projectName . '/');
-                $query->bindValue(':createdAt', $this->getCreatedAt()->format('Y-m-d H:i:s'));
-                $query->bindValue(':user_id', $this->getUserId());
-                $query->bindValue(':project_id', $this->getProjectId());
+                $query = $this->db->prepare('INSERT INTO ' . $this->table . ' (fileName, location, createdAt, user_id, project_id) VALUES (:fileName, :location, :createdAt, :user_id, :project_id)'); // Préparer la requête SQL
+                $query->bindValue(':fileName', basename($imagePath)); // Associer la valeur du nom du fichier
+                $query->bindValue(':location', $this->getLocation() . $username . '/' . $projectName . '/'); // Associer la valeur de l'emplacement du fichier dans le dossier uploads
+                $query->bindValue(':createdAt', $this->getCreatedAt()->format('Y-m-d H:i:s')); // Associer la valeur de la date de création
+                $query->bindValue(':user_id', $this->getUserId()); // Associer la valeur de l'ID de l'utilisateur
+                $query->bindValue(':project_id', $this->getProjectId()); // Associer la valeur de l'ID du projet
                 $query->execute(); // Exécuter la requête SQL
             }
         } catch (Exception $e) {
@@ -67,10 +67,48 @@ class Upload extends Model
     }
 
     /**
+     * Met à jour les informations d'un fichier dans la base de données.
+     * @param int $fileId ID du fichier à mettre à jour
+     * @param string $fileName Nom du fichier
+     * @param string $location Emplacement du fichier
+     * @return void
+     * @throws Exception
+     */
+    public function update(int $fileId, string $fileName, string $location): void
+    {
+        try {
+            $query = $this->db->prepare('UPDATE ' . $this->table . ' SET fileName = :fileName, location = :location WHERE id = :id'); // Préparer la requête de mise à jour
+            $query->bindValue(':fileName', $fileName); // Associer la valeur du nom du fichier
+            $query->bindValue(':location', $location); // Associer la valeur de l'emplacement du fichier
+            $query->bindValue(':id', $fileId); // Associer la valeur de l'ID
+            $query->execute(); // Exécuter la requête SQL
+        } catch (Exception $e) {
+            throw new Exception('Erreur lors de la mise à jour du fichier : ' . $e->getMessage()); // Message d'erreur
+        }
+    }
+
+    /**
+     * Supprime un fichier de la base de données.
+     * @param int $id ID du fichier à supprimer
+     * @return void
+     * @throws Exception
+     */
+    public function delete(int $id): void
+    {
+        try {
+            $query = $this->db->prepare('DELETE FROM ' . $this->table . ' WHERE id = :id'); // Préparer la requête de suppression
+            $query->bindValue(':id', $id); // Associer la valeur de l'ID
+            $query->execute(); // Exécuter la requête SQL
+        } catch (Exception $e) {
+            throw new Exception('Erreur lors de la suppression du fichier : ' . $e->getMessage()); // Message d'erreur
+        }
+    }
+
+    /**
      * @return array Chemins des images téléchargées
      * @throws Exception
      */
-    public function uploadImages(array $files, string $username, string $projectName): array
+    public function uploadFiles(array $files, string $username, string $projectName): array
     {
         $uploadedPaths = []; // Tableau des images téléchargées
 
@@ -83,12 +121,11 @@ class Upload extends Model
 
         // Parcourir les fichiers téléchargés
         foreach ($files['tmp_name'] as $index => $tmpName) {
-            // Récupérer le nom du fichier
-            $fileName = $files['name'][$index];
+            $fileName = $files['name'][$index]; // Récupérer le nom du fichier
 
             // Vérifier si le fichier a été téléchargé avec succès
             if ($tmpName === '') {
-                throw new Exception('Le fichier ' . $fileName . ' n\'a pas été téléchargé avec succès.');
+                throw new Exception('Le fichier ' . $fileName . ' n\'a pas été téléchargé avec succès.'); // Message d'erreur
             }
 
             $extension = pathinfo($fileName, PATHINFO_EXTENSION); // Récupérer l'extension du fichier
@@ -97,7 +134,7 @@ class Upload extends Model
 
             // Vérifier si le fichier a été déplacé avec succès
             if (!$uploaded) {
-                throw new Exception('Le fichier ' . $fileName . ' n\'a pas été déplacé avec succès.');
+                throw new Exception('Le fichier ' . $fileName . ' n\'a pas été déplacé avec succès.'); // Message d'erreur
             }
 
             $uploadedPaths[] = $this->location . $uniqueFileName; // Ajouter le chemin du fichier dans le tableau
@@ -106,44 +143,30 @@ class Upload extends Model
     }
 
     /**
-     * @return string Nom du fichier
+     * Récupère les images correspondant à l'ID du projet.
+     * @param int $projectId L'ID du projet
+     * @return array Un tableau d'images correspondantes
+     * @throws Exception
      */
-    private function getFileName(): string
+    public function getProjectUploads(int $projectId): array
     {
-        return $this->fileName;
+        try {
+            $query = $this->db->prepare('SELECT * FROM ' . $this->table . ' WHERE project_id = :projectId'); // Préparer la requête
+            $query->bindParam(':projectId', $projectId, PDO::PARAM_INT); // Associer la valeur de l'ID du projet
+            $query->execute(); // Exécuter la requête SQL
+
+            return $query->fetchAll(PDO::FETCH_ASSOC); // Retourner les résultats de la requête
+        } catch (Exception $e) {
+            throw new Exception('Erreur lors de la récupération des images du projet : ' . $e->getMessage()); // Gérer l'exception
+        }
     }
 
     /**
-     * @return string Emplacement du fichier
+     * @return array Fichiers
      */
-    private function getLocation(): string
+    public function getFiles(): array
     {
-        return $this->location;
-    }
-
-    /**
-     * @return DateTime Date de création
-     */
-    private function getCreatedAt(): DateTime
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @return int|null ID de l'utilisateur
-     *
-     */
-    private function getUserId(): ?int
-    {
-        return $this->userId;
-    }
-
-    /**
-     * @return int|null ID du projet
-     */
-    private function getProjectId(): ?int
-    {
-        return $this->projectId;
+        return $this->files;
     }
 
     /**
@@ -156,12 +179,28 @@ class Upload extends Model
     }
 
     /**
+     * @return string Nom du fichier
+     */
+    private function getFileName(): string
+    {
+        return $this->fileName;
+    }
+
+    /**
      * @param string $fileName Nom du fichier
      * @return void
      */
     public function setFileName(string $fileName): void
     {
         $this->fileName = $fileName;
+    }
+
+    /**
+     * @return string Emplacement du fichier
+     */
+    public function getLocation(): string
+    {
+        return $this->location;
     }
 
     /**
@@ -174,6 +213,14 @@ class Upload extends Model
     }
 
     /**
+     * @return DateTime Date de création
+     */
+    public function getCreatedAt(): DateTime
+    {
+        return $this->createdAt;
+    }
+
+    /**
      * @param DateTime $createdAt Date de création
      * @return void
      */
@@ -183,12 +230,11 @@ class Upload extends Model
     }
 
     /**
-     * @param int|null $projectId ID du projet
-     * @return void
+     * @return int|null ID de l'utilisateur
      */
-    public function setProjectId(?int $projectId): void
+    public function getUserId(): ?int
     {
-        $this->projectId = $projectId;
+        return $this->userId;
     }
 
     /**
@@ -198,5 +244,22 @@ class Upload extends Model
     public function setUserId(?int $userId): void
     {
         $this->userId = $userId;
+    }
+
+    /**
+     * @return int|null ID du projet
+     */
+    public function getProjectId(): ?int
+    {
+        return $this->projectId;
+    }
+
+    /**
+     * @param int|null $projectId ID du projet
+     * @return void
+     */
+    public function setProjectId(?int $projectId): void
+    {
+        $this->projectId = $projectId;
     }
 }

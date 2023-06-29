@@ -2,12 +2,14 @@
 
 namespace App\Model;
 
+use AllowDynamicProperties;
+
 /**
  * Class Session
  * Gère la session utilisateur.
  * @package App\Model
  */
-class Session
+#[AllowDynamicProperties] class Session
 {
     /**
      * Initialise la session si elle n'est pas déjà démarrée.
@@ -56,5 +58,15 @@ class Session
     public static function getUser(): ?array
     {
         return $_SESSION['auth'] ?? null;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un administrateur.
+     * @return bool
+     */
+    public static function checkAuthorization(): bool
+    {
+        $user = self::getUser(); // Récupérer les informations de l'utilisateur connecté
+        return self::isLoggedIn() && $user !== null && $user['isAdmin'] === 1; // Vérifier si l'utilisateur est connecté et si c'est un administrateur
     }
 }

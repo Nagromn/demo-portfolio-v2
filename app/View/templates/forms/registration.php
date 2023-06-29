@@ -2,6 +2,9 @@
 
 <!--Formulaire d'inscription-->
 <form method="POST" action="/admin-registration">
+    <label for="username">Pseudo :</label>
+    <input type="text" name="username" id="username" required>
+    <br>
     <label for="email">Email :</label>
     <input type="email" name="email" id="email" required>
     <br>

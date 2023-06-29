@@ -41,10 +41,10 @@ class User extends Model
             $query->bindValue(':username', $this->getUsername());
             $query->bindValue(':email', $this->getEmail());
             $query->bindValue(':password', $this->getPassword());
-            $query->bindValue(':createdAt', $this->getIsAdmin());
+            $query->bindValue(':isAdmin', $this->getIsAdmin());
             $query->execute(); // Exécute la requête d'insertion dans la base de données
         } catch (Exception $e) {
-            echo 'Exception reçue : ',  $e->getMessage(), "\n";
+            echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
 
@@ -64,10 +64,9 @@ class User extends Model
             $request->execute([':email' => $email]);
             $result = $request->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            echo $e->getMessage();
-            die;
+            echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
-        return $result ?: null;
+        return $result ?: null; // Retourne l'email de l'utilisateur ou null si aucun email n'est trouvé
     }
 
     /**
@@ -77,27 +76,41 @@ class User extends Model
      */
     public function update(array $params): void
     {
-        $id = $params['id'];
-        $email = $params['email'];
-        $password = $params['password'];
-        $isAdmin = $params['isAdmin'] ?? 0;
+        $id = $params['id'] ?? null; // Récupère l'id de l'utilisateur
+        $email = $params['email'] ?? null; // Récupère l'email de l'utilisateur
+        $password = $params['password'] ?? null; // Récupère le mot de passe de l'utilisateur
 
         try {
-            $pdo = $this->connect();
-            $statement = $pdo->prepare("
-            UPDATE $this->table 
+            $request = $this->db->prepare("
+            UPDATE $this->table
             SET email = :email, password = :password, isAdmin = :isAdmin
             WHERE id = :id
         ");
-            $statement->execute([
+            $request->execute([
                 ':id' => $id,
                 ':email' => $email,
                 ':password' => $password,
-                ':isAdmin' => $isAdmin
             ]);
         } catch (Exception $e) {
             echo 'Exception reçue : ', $e->getMessage(), "\n";
-            die;
+        }
+    }
+
+    /**
+     * Supprime un utilisateur de la base de données.
+     * @return void
+     * @throws Exception En cas d'erreur lors de l'exécution de la requête
+     */
+    public function delete(): void
+    {
+        try {
+            $request = $this->db->prepare("
+                DELETE FROM $this->table
+                WHERE id = :id
+            ");
+            $request->execute([':id' => $this->getId()]);
+        } catch (Exception $e) {
+            echo 'Exception reçue : ', $e->getMessage(), "\n";
         }
     }
 

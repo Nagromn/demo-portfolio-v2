@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Model\Session;
 use App\Model\User;
 use Exception;
 use Utils\Renderer;
@@ -14,7 +15,6 @@ class UserType
 {
     /**
      * Permet de gérer la soumission du formulaire d'inscription.
-     * @param array $params
      * @param User $user
      * @throws Exception
      */
@@ -22,12 +22,11 @@ class UserType
     {
         // Vérifier si le formulaire a été soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             // Récupérer les données du formulaire
-            $username = $_POST['username'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-            $isAdmin = $_POST['isAdmin'] ?? 0;
+            $username = $_POST['username']; // Le pseudo de l'utilisateur
+            $email = $_POST['email']; // L'adresse e-mail de l'utilisateur
+            $password = $_POST['password']; // Le mot de passe de l'utilisateur
+            $isAdmin = $_POST['isAdmin'] ?? 0; // Le rôle de l'utilisateur (0 = utilisateur, 1 = administrateur)
 
             $existingUser = $user->findByEmail($email); // Vérifier si l'utilisateur existe dans la base de données
 
@@ -38,7 +37,6 @@ class UserType
 
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hacher le mot de passe
 
-            // Insérer les données de l'utilisateur dans la base de données
             try {
                 $user->setUsername($username); // Définir le pseudo de l'utilisateur
                 $user->setEmail($email); // Définir l'adresse e-mail de l'utilisateur
@@ -46,13 +44,11 @@ class UserType
                 $user->setIsAdmin($isAdmin); // Définir le rôle de l'utilisateur
                 $user->insert(); // Insérer l'utilisateur dans la base de données
 
-                // Rediriger vers la page d'administration
-                Renderer::render('app/View/templates/pages/admin/dashboard.php', [
-                    'success' => 'L\'utilisateur a bien été créé.'
-                ]);
+                header('Location: /admin-dashboard'); // Rediriger vers le tableau de bord de l'administrateur
+                echo 'L\'utilisateur a été créé avec succès.'; // Message de succès
+                exit;
             } catch (Exception $e) {
-                echo 'Exception reçue : ',  $e->getMessage(), "\n";
-                die;
+                throw new Exception("Une erreur s'est produite lors de la création de l'utilisateur.");
             }
         }
     }
@@ -67,38 +63,32 @@ class UserType
     {
         // Vérifier si le formulaire a été soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             // Récupérer les données du formulaire
-            $id = $_POST['id'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
+            $id = $_POST['id']; // L'identifiant de l'utilisateur
+            $email = $_POST['email']; // L'adresse e-mail de l'utilisateur
+            $password = $_POST['password']; // Le nouveau mot de passe de l'utilisateur
 
-            // Vérifier si l'utilisateur existe dans la base de données
-            $existingUser = $user->findById($id);
+            $existingUser = $user->findById($id); // Vérifier si l'utilisateur existe dans la base de données
 
             // Si l'utilisateur existe
             if ($existingUser) {
                 // Hacher le mot de passe
-                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hacher le mot de passe
 
-                // Mettre à jour les données de l'utilisateur dans la base de données
                 try {
                     // Définir les paramètres de la requête
                     $params = [
-                        'id' => $id,
-                        'email' => $email,
-                        'password' => $hashedPassword,
+                        'id' => $id, // L'identifiant de l'utilisateur
+                        'email' => $email, // L'adresse e-mail de l'utilisateur
+                        'password' => $hashedPassword, // Le mot de passe de l'utilisateur haché
                     ];
 
-                    // Mettre à jour les données de l'utilisateur dans la base de données
-                    $user->update($params);
-
-                    // Rediriger vers la page d'administration
-                    Renderer::render('app/View/templates/pages/admin/dashboard.php', [
-                        'success' => 'Les informations de l\'utilisateur ont bien été mises à jour.'
-                    ]);
+                    $user->update($params); // Mettre à jour les données de l'utilisateur dans la base de données
+                    header('Location: /admin-dashboard'); // Rediriger vers la page d'administration
+                    echo 'Les informations de l\'utilisateur ont été mises à jour avec succès.'; // Message de succès
+                    exit;
                 } catch (Exception $e) {
-                    throw new Exception($e->getMessage());
+                    throw new Exception("Une erreur s'est produite lors de la mise à jour des informations de l'utilisateur: " . $e->getMessage());
                 }
             } else {
                 throw new Exception("L'utilisateur n'existe pas.");
