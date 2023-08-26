@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controllers;
 use Utils\Renderer;
 
 /**
@@ -14,7 +14,7 @@ class HomeController
      */
     public function home(): void
     {
-        Renderer::render('app/View/templates/pages/home.php');
+        Renderer::render('app/Views/templates/pages/home.php');
     }
 
     /**
@@ -22,7 +22,7 @@ class HomeController
      */
     public function professional(): void
     {
-        Renderer::render('app/View/templates/pages/professional.php');
+        Renderer::render('app/Views/templates/pages/professional.php');
     }
 
     /**
@@ -30,7 +30,7 @@ class HomeController
      */
     public function project(): void
     {
-        Renderer::render('app/View/templates/pages/project.php');
+        Renderer::render('app/Views/templates/pages/project.php');
     }
 
     /**
@@ -38,6 +38,6 @@ class HomeController
      */
     public function skill(): void
     {
-        Renderer::render('app/View/templates/pages/skill.php');
+        Renderer::render('app/Views/templates/pages/skill.php');
     }
 }

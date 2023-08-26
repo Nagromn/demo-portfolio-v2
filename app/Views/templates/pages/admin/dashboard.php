@@ -27,7 +27,6 @@ foreach ($projectData as $project): ?>
         <br>
     <?php endforeach; ?>
 
-
     <!--Afficher le contenu du projet-->
     <p><?= $project['content']; ?></p>
 

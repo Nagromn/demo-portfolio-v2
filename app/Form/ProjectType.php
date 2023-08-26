@@ -2,10 +2,10 @@
 
 namespace App\Form;
 
-use App\Model\Project;
-use App\Model\ProjectCategory;
-use App\Model\Session;
-use App\Model\Upload;
+use App\Models\Project;
+use App\Models\ProjectCategory;
+use App\Models\Session;
+use App\Models\Upload;
 use DateTime;
 use Exception;
 

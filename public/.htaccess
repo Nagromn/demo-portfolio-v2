@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /
+
+# Permettre l'accès direct au dossier "uploads"
+RewriteRule ^uploads/ - [L]
+
+# Redirection vers le dossier "public" pour les autres requêtes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]

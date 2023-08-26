@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controllers;
 
-use App\Model\Session;
-use App\Model\User;
+use App\Models\Session;
+use App\Models\User;
 use Exception;
 use JetBrains\PhpStorm\NoReturn;
 use Utils\Renderer;
@@ -59,7 +59,7 @@ class SecurityController
             echo 'Exception reçue : ',  $e->getMessage(), "\n";
         }
         // Afficher le formulaire de connexion par défaut
-        Renderer::render('app/View/templates/forms/login.php');
+        Renderer::render('app/Views/templates/forms/login.php');
     }
 
     /**

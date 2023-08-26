@@ -2,9 +2,9 @@
 
 namespace Routes;
 
-use App\Controller\HomeController;
-use App\Controller\AdminController;
-use App\Controller\SecurityController;
+use App\Controllers\AdminController;
+use App\Controllers\HomeController;
+use App\Controllers\SecurityController;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;

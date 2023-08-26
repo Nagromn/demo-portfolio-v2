@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controllers;
 
 use AllowDynamicProperties;
 use App\Form\ProjectType;
 use App\Form\UserType;
-use App\Model\Category;
-use App\Model\Project;
-use App\Model\ProjectCategory;
-use App\Model\Session;
-use App\Model\Upload;
-use App\Model\User;
+use App\Models\Category;
+use App\Models\Project;
+use App\Models\ProjectCategory;
+use App\Models\Session;
+use App\Models\Upload;
+use App\Models\User;
 use Exception;
 use Utils\Renderer;
 
@@ -71,8 +71,8 @@ use Utils\Renderer;
         }
 
         // Le reste du code pour afficher le tableau de bord de l'administrateur
-        Renderer::render('app/View/templates/pages/admin/dashboard.php', [
-            'projectData' => $projectData, // Les projets
+        Renderer::render('app/Views/templates/pages/admin/dashboard.php', [
+            'projectData' => $projectData // Les projets
         ]);
     }
 
@@ -90,7 +90,7 @@ use Utils\Renderer;
     {
         $userType->registrationForm($user); // Gère la soumission du formulaire
         // Rend le fichier de template registration.php en utilisant la classe Renderer
-        Renderer::render('app/View/templates/forms/registration.php', [
+        Renderer::render('app/Views/templates/forms/registration.php', [
             'form' => $userType, // Le formulaire UserType
         ]);
     }
@@ -124,7 +124,7 @@ use Utils\Renderer;
             $upload
         );
         // Rend le fichier de template projectForm.php en utilisant la classe Renderer
-        Renderer::render('app/View/templates/forms/projectForm.php', [
+        Renderer::render('app/Views/templates/forms/projectForm.php', [
             'form' => $projectType, // Le formulaire ProjectType
             'categories' => $category->findAll(), // La liste des catégories
         ]);
@@ -147,7 +147,7 @@ use Utils\Renderer;
         // Vérifier si l'utilisateur est connecté
         if (!Session::isLoggedIn()) {
             // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
-            Renderer::render('app/View/templates/forms/login.php');
+            Renderer::render('app/Views/templates/forms/login.php');
             exit;
         }
 
@@ -167,7 +167,7 @@ use Utils\Renderer;
         }
 
         // Rend le fichier de template userUpdate.php en utilisant la classe Renderer
-        Renderer::render('app/View/templates/forms/userUpdate.php', [
+        Renderer::render('app/Views/templates/forms/userUpdate.php', [
             'form' => $userType, // Le formulaire UserType
             'userData' => $userData, // Les informations de l'utilisateur
         ]);
@@ -188,7 +188,7 @@ use Utils\Renderer;
 
         // Vérifier si l'utilisateur est connecté
         if (!Session::isLoggedIn()) {
-            Renderer::render('app/View/templates/forms/login.php'); // Rend le fichier de template login.php
+            Renderer::render('app/Views/templates/forms/login.php'); // Rend le fichier de template login.php
             exit; // Arrêter le script
         }
 
@@ -212,7 +212,7 @@ use Utils\Renderer;
         }
 
         // Rend le fichier de template updateProject.php en utilisant la classe Renderer
-        Renderer::render('app/View/templates/forms/projectUpdate.php', [
+        Renderer::render('app/Views/templates/forms/projectUpdate.php', [
             'form' => $projectType, // Le formulaire ProjectType
             'projectData' => $projectData, // Les informations du projet
         ]);

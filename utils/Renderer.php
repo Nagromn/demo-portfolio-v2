@@ -30,6 +30,6 @@ class Renderer
         $content = ob_get_clean();
 
         // Inclusion du template de base pour afficher le contenu
-        require dirname(__DIR__) . '/app/View/templates/base.php';
+        require dirname(__DIR__) . '/app/Views/templates/base.php';
     }
 }

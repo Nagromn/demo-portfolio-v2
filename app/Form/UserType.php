@@ -2,10 +2,8 @@
 
 namespace App\Form;
 
-use App\Model\Session;
-use App\Model\User;
+use App\Models\User;
 use Exception;
-use Utils\Renderer;
 
 /**
  * Class UserType

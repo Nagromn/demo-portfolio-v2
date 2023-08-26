@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Model;
+namespace App\Models;
 
-use PDO;
 use Exception;
+use PDO;
 
 /**
  * Class User
